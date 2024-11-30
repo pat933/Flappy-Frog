@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Frog</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #70c5ce;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #70c5ce;
+        }
+
+        .game-over {
+            color: white;
+            font-size: 30px;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .header {
+            text-align: center;
+            font-size: 40px;
+            margin-top: 20px;
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .start-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #32CD32;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .start-button:hover {
+            background-color: #228B22;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Flappy Frog</div>
+    <div class="instructions">Steuerung = Pfeiltaste Hoch</div>
+    <button class="start-button" id="startButton">Start Game</button>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="game-over" id="gameOverText" style="display: none;">Game Over! Press Arrow Up to Restart</div>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const frogSize = 30;
+        const pipeWidth = 50;
+        const gapHeight = 200;
+        let frogX = 100;
+        let frogY = canvas.height / 2; // Adjusted frog start position
+        let velocity = 0;
+        const gravity = 0.025;
+        const lift = -2.5;
+        let pipes = [];
+        let gameOver = false;
+        let score = 0;
+
+        function drawFrog() {
+            ctx.fillStyle = "#349934";
+            ctx.fillRect(frogX, frogY, frogSize, frogSize);
+        }
+
+        function drawPipes() {
+            ctx.fillStyle = "#91ad3e";
+            pipes.forEach(pipe => {
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
+                ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY);
+            });
+        }
+
+        function movePipes() {
+            pipes.forEach(pipe => {
+                pipe.x -= 1;
+            });
+            if (pipes.length > 0 && pipes[0].x + pipeWidth < 0) {
+                pipes.shift();
+                score++;
+            }
+        }
+
+        function generatePipes() {
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
+                const topHeight = Math.floor(Math.random() * (canvas.height - gapHeight));
+                const bottomY = topHeight + gapHeight;
+                pipes.push({
+                    x: canvas.width,
+                    topHeight,
+                    bottomY
+                });
+            }
+        }
+
+        function checkCollisions() {
+            if (frogY + frogSize > canvas.height || frogY < 0) {
+                gameOver = true;
+            }
+            pipes.forEach(pipe => {
+                if (
+                    frogX + frogSize > pipe.x &&
+                    frogX < pipe.x + pipeWidth &&
+                    (frogY < pipe.topHeight || frogY + frogSize > pipe.bottomY)
+                ) {
+                    gameOver = true;
+                }
+            });
+        }
+
+        function drawScore() {
+            ctx.fillStyle = "#000000";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 10, 30);
+        }
+
+        function update() {
+            if (gameOver) {
+                document.getElementById("gameOverText").style.display = "block";
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawFrog();
+            drawPipes();
+            drawScore();
+            movePipes();
+            generatePipes();
+            checkCollisions();
+
+            velocity += gravity;
+            frogY += velocity;
+
+            requestAnimationFrame(update);
+        }
+
+        function startGame() {
+            frogY = canvas.height / 2;
+            velocity = 0;
+            pipes = [];
+            gameOver = false;
+            score = 0;
+            document.getElementById("gameOverText").style.display = "none";
+            update();
+        }
+
+        // Use the Arrow Up key to jump the frog
+        document.addEventListener("keydown", (e) => {
+            if (gameOver && e.key === "ArrowUp") {
+                startGame(); // Restart the game when pressing Arrow Up after Game Over
+            } else if (e.key === "ArrowUp") {
+                velocity = lift; // Make the frog jump when pressing Arrow Up
+            }
+        });
+
+        document.getElementById("startButton").addEventListener("click", () => {
+            startGame(); // Start the game when the Start button is clicked
+            document.getElementById("startButton").style.display = "none"; // Hide the start button after the game starts
+        });
+    </script>
+</body>
+</html>
