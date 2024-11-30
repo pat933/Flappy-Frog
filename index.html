@@ -61,7 +61,7 @@
     <div class="instructions">Steuerung = Pfeiltaste Hoch</div>
     <button class="start-button" id="startButton">Start Game</button>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div class="game-over" id="gameOverText" style="display: none;">Game Over! Press Arrow Up to Restart</div>
+    <div class="game-over" id="gameOverText" style="display: none;">Game Over! Press Arrow down to Restart</div>
 
     <script>
         const canvas = document.getElementById("gameCanvas");
@@ -167,9 +167,9 @@
 
         // Use the Arrow Up key to jump the frog
         document.addEventListener("keydown", (e) => {
-            if (gameOver && e.key === "ArrowUp") {
+            if (gameOver && e.key === "ArrowDown") {
                 startGame(); // Restart the game when pressing Arrow Up after Game Over
-            } else if (e.key === "ArrowUp") {
+            } else if (e.key === "ArrowDown") {
                 velocity = lift; // Make the frog jump when pressing Arrow Up
             }
         });
